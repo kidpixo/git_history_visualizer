@@ -2,6 +2,7 @@
 git init
 
 # do stuff with the files
+touch / rm / write
 
 # extrat all the commits 
 git --no-pager log --reverse --oneline
