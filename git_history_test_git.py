@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[9]:
+# In[2]:
 
 commits_list = get_ipython().getoutput(u'git --no-pager log --reverse --oneline')
 
@@ -55,7 +55,7 @@ all_files = get_ipython().getoutput(u"git --no-pager log --reverse --name-only -
 # 
 # 
 
-# In[11]:
+# In[4]:
 
 all_filenames = pd.DataFrame(pd.DataFrame(list(all_files)),columns=commits, index=all_files)
 all_commits = get_ipython().getoutput(u"git --no-pager log --reverse --name-status --oneline --pretty='format:COMMIT %h %s' | tr '\\t' ' ' | sed -e '/^$/d'")
@@ -102,17 +102,17 @@ for i in all_commits:
         all_filenames.ix[value,actual_commit] = state
 
 
-# In[12]:
+# In[5]:
 
 all_commits
 
 
-# In[13]:
+# In[6]:
 
 all_filenames
 
 
-# In[14]:
+# In[7]:
 
 def_states = {
     'A' : 120,
@@ -125,21 +125,21 @@ def_states = {
 history = all_filenames.applymap(lambda x: def_states[x]).values.copy()
 
 
-# In[15]:
+# In[8]:
 
 h = history.astype('float')
 h[history == 128] = np.nan
 
 
-# In[22]:
+# In[14]:
 
-fig = plt.figure(figsize=[10,8])
+fig = plt.figure(figsize=[10,12])
 
 ax = plt.subplot(111)
 for i in range(len(all_files)):
     x = range(len(commits))
     y = [i for kk in x]
-    ax.scatter(x, y, s = 700, c=h[i,:], alpha=1, marker='o',linewidths = 3 , cmap = plt.cm.spectral,vmin = 0, vmax = 255)
+    ax.scatter(x, y, s = 500, c=h[i,:], alpha=1, marker='o',linewidths = 3 , cmap = plt.cm.spectral,vmin = 0, vmax = 255)
     ax.plot(x, y, lw = 3, c='k', zorder=0)
  
 ax.set_xticks(range(history.shape[1]))
@@ -170,7 +170,7 @@ colors[colors == 128] = np.nan
 
 x = range(len(colors))
 y = [1 for kk in x]
-ax2.scatter(x, y, s = 700, c=colors, alpha=1, marker='o',linewidths = 3, cmap = plt.cm.spectral,vmin = 0, vmax = 255)
+ax2.scatter(x, y, s = 500, c=colors, alpha=1, marker='o',linewidths = 3, cmap = plt.cm.spectral,vmin = 0, vmax = 255)
 ax2.plot(x, y, lw = 3, c='k', zorder=0)
  
 ax2.set_xticks(x)
