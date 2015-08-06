@@ -11,9 +11,9 @@ from matplotlib import pyplot as plt
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[2]:
+# In[9]:
 
-commits_list = get_ipython().getoutput(u'git -C test_git --no-pager log --reverse --oneline')
+commits_list = get_ipython().getoutput(u'git --no-pager log --reverse --oneline')
 
 commits = []
 for i in commits_list:
@@ -22,19 +22,19 @@ for i in commits_list:
     commits.append(sha1)
 
 
-# In[ ]:
+# In[41]:
 
 import subprocess
 
-path = '/Users/damo_ma/Documents/programs_and_data/data/MERTIS/MERTIS_MDB_Configuration/MERTIS_Configuration_svn/test_git'
-p = subprocess.Popen(['git','-C ',path,' --no-pager log --reverse --oneline'], stdout=subprocess.PIPE)
+path = '/Users/damo_ma/Downloads/github_rep/git_history_visualizer'
+p = subprocess.Popen(['git -C '+path+' --no-pager log --reverse --oneline'], stdout=subprocess.PIPE, shell=True)
 for line in iter(p.stdout.readline,''):
     print line.rstrip()
 
 
-# In[62]:
+# In[3]:
 
-all_files = get_ipython().getoutput(u"git -C test_git --no-pager log --reverse --name-only --oneline --pretty='format:' |  sed '/^$/d' | sort | uniq")
+all_files = get_ipython().getoutput(u"git --no-pager log --reverse --name-only --oneline --pretty='format:' |  sed '/^$/d' | sort | uniq")
 
 
 # ### Legend
@@ -55,10 +55,10 @@ all_files = get_ipython().getoutput(u"git -C test_git --no-pager log --reverse -
 # 
 # 
 
-# In[4]:
+# In[11]:
 
 all_filenames = pd.DataFrame(pd.DataFrame(list(all_files)),columns=commits, index=all_files)
-all_commits = get_ipython().getoutput(u"cd test_git 1>/dev/null;  git --no-pager log --reverse --name-status --oneline --pretty='format:COMMIT %h %s' | tr '\\t' ' ' | sed -e '/^$/d'")
+all_commits = get_ipython().getoutput(u"git --no-pager log --reverse --name-status --oneline --pretty='format:COMMIT %h %s' | tr '\\t' ' ' | sed -e '/^$/d'")
 
 def_states = {
     'A' : 0,
@@ -102,17 +102,17 @@ for i in all_commits:
         all_filenames.ix[value,actual_commit] = state
 
 
-# In[5]:
+# In[12]:
 
 all_commits
 
 
-# In[7]:
+# In[13]:
 
 all_filenames
 
 
-# In[6]:
+# In[14]:
 
 def_states = {
     'A' : 120,
@@ -125,15 +125,15 @@ def_states = {
 history = all_filenames.applymap(lambda x: def_states[x]).values.copy()
 
 
-# In[7]:
+# In[15]:
 
 h = history.astype('float')
 h[history == 128] = np.nan
 
 
-# In[61]:
+# In[22]:
 
-fig = plt.figure(figsize=[10,6])
+fig = plt.figure(figsize=[10,8])
 
 ax = plt.subplot(111)
 for i in range(len(all_files)):
@@ -143,7 +143,7 @@ for i in range(len(all_files)):
     ax.plot(x, y, lw = 3, c='k', zorder=0)
  
 ax.set_xticks(range(history.shape[1]))
-ax.set_xticklabels(all_filenames.columns,rotation=70)
+ax.set_xticklabels(all_filenames.columns,rotation=90)
 
 ax.set_xlabel('commits sha-1 (time arrow to the right ->)')
 ax.set_xlim([-.5,len(commits)-0.5])
@@ -163,7 +163,7 @@ for tic in ax.yaxis.get_major_ticks():
     tic.tick1On = tic.tick2On = False
 #     tic.label1On = tic.label2On = False
 
-ax2 = fig.add_axes([0.1, .9, 0.8, 0.075])
+ax2 = fig.add_axes([0.25, .9, 0.5, 0.075])
  
 colors = np.array(def_states.values()).astype('float')
 colors[colors == 128] = np.nan
@@ -192,7 +192,7 @@ for tic in ax2.yaxis.get_major_ticks():
 fig.savefig('/Users/damo_ma/Desktop/test.png')
 
 
-# In[204]:
+# In[23]:
 
 # fake legend
 a = np.empty([2,len(def_states)])
@@ -203,7 +203,7 @@ plt.xticks(range(len(def_states)), [k for k in def_states.iterkeys()]);
 plt.yticks([1], '');
 
 
-# In[205]:
+# In[24]:
 
 fig = plt.figure(figsize=[10,10])
 
@@ -212,4 +212,9 @@ plt.xticks(range(history.shape[1]), all_filenames.columns, rotation='vertical');
 plt.xlabel('commits sha-1 (time arrow to the right ->)')
 plt.ylabel('file names')
 plt.yticks(range(history.shape[0]), all_filenames.index.tolist());
+
+
+# In[ ]:
+
+
 
