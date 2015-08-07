@@ -11,32 +11,12 @@ from matplotlib import pyplot as plt
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[2]:
+# In[4]:
 
 import subprocess
 
 
-# In[187]:
-
-# get the whole git history
-
-# # ipythonic way
-# all_commits = ! git --no-pager log --reverse --name-status --oneline --pretty='format:COMMIT %h %s' | tr '\t' ' ' | sed -e '/^$/d'
-
-# pythonic way
-p = subprocess.check_output(
-    ["git -C "+path+""" --no-pager log --reverse --name-status --oneline --pretty='format:C %h' | tr '\t' ' ' | sed -e '/^$/d' """]
-    , shell=True, universal_newlines=True)
-all_commits = [i.split(' ') for i in p.split('\n')[0:-1]]
-
-# get all the commits SHA-1
-commits = [i[1] for i in all_commits if i[0] == 'C']
-
-# get all the file in the history
-all_files = set([i[1] for i in all_commits if i[0] != 'C'])
-
-
-# In[5]:
+# In[43]:
 
 class git_history:
     """ Common base class for all git history.
@@ -106,10 +86,10 @@ class git_history:
         self.commits = [i[1] for i in self.all_commits if i[0] == 'C']
 
         # get all the file in the history
-        self.all_files = set([i[1] for i in self.all_commits if i[0] != 'C'])   
+        self.all_files = sorted(set([i[1] for i in self.all_commits if i[0] != 'C']))
 
 
-# In[6]:
+# In[44]:
 
 path = '/Users/damo_ma/Downloads/github_rep/git_history_visualizer'
 
@@ -126,7 +106,7 @@ gt.get_history()
 # 
 # The inizial stata for all the files is `N` or `Non existent`, they are updated in the sequential reding of `git_history.all_commits` object.
 
-# In[7]:
+# In[45]:
 
 all_filenames = pd.DataFrame(pd.DataFrame(list(gt.all_files)),columns=gt.commits, index=gt.all_files)
 
@@ -172,7 +152,7 @@ for i in gt.all_commits:
         all_filenames.ix[value,actual_commit] = state
 
 
-# In[40]:
+# In[46]:
 
 def plot_history_df(plot_df):
 
@@ -196,6 +176,7 @@ def plot_history_df(plot_df):
     ax.set_ylabel('file names')
     ax.set_yticks(range(h.shape[0]))
     ax.set_yticklabels(plot_df.index.tolist())
+    print plot_df.index.tolist()
     ax.set_yticks = 0.1
     # set 0 to bounding box width
     [i.set_linewidth(0.0) for i in ax.spines.itervalues()]
@@ -238,13 +219,13 @@ def plot_history_df(plot_df):
     # fig.savefig('/Users/damo_ma/Desktop/test.png')
 
 
-# In[57]:
+# In[47]:
 
 all_filenames
 plot_history_df(all_filenames)
 
 
-# In[59]:
+# In[48]:
 
 # filtering the history on:
 # a commit range
@@ -253,7 +234,7 @@ plot_df_commit_range
 plot_history_df(plot_df_commit_range)
 
 
-# In[60]:
+# In[49]:
 
 # filtering the history on:
 # a file range: all files not ending with txt
@@ -262,7 +243,7 @@ plot_df_file_range
 plot_history_df(plot_df_file_range)
 
 
-# In[61]:
+# In[50]:
 
 # filtering the history on:
 # a commit range AND a file range: all files not ending with txt
