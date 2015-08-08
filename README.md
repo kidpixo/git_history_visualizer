@@ -13,6 +13,10 @@ The idea is to extract the whole commits log via the `git` command (you should h
 
 # Example
 
+The notebook and the python script included ([git_history_test_git.ipynb](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.ipynb) and [git_history_test_git.py](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.py)) are just example. 
+
+Change the path at the beginning with your repository path and play with the visualizzation at the end.
+
 This example is on this very repository. The first `*txt` files were only placeholders.
 
 This is the complete visual history of this repository using
@@ -30,7 +34,7 @@ This is a commit range, using Python Data Analysis Library ([pandas](http://pand
 plot_df_commit_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
 ```
 
-![](images/commit_range_visual_history.png)
+![](images/commit_range.png)
 
 This is a range of files, using
 
@@ -38,7 +42,7 @@ This is a range of files, using
 plot_df_file_range = all_filenames[~all_filenames.index.str.contains('txt$')]
 ```
 
-![](images/files_range_visual_history.png)
+![](images/file_range.png)
 
 This is combines the two filters, using
 
@@ -47,4 +51,12 @@ plot_df_commit_file_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
                             [~all_filenames.index.str.contains('txt$')]
 ```
 
-![](images/commit_and_files_range_visual_history.png)
+![](images/commit_file_range.png)
+
+This is filter on the all the state in the last commit, using
+
+```python
+plot_df_state_filter = all_filenames[all_filenames[all_filenames.columns[-1]] != 'N']
+```
+
+![](images/state_filter.png)
