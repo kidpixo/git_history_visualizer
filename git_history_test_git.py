@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[7]:
 
 import githistoryvis as ghv
 
@@ -54,7 +54,7 @@ import githistoryvis as ghv
 # 
 # 
 
-# In[33]:
+# In[8]:
 
 import os
 
@@ -75,50 +75,12 @@ gt.get_history()
 
 # ## Deserialize and structure the data
 # 
-# The data gather in `githistoryvis.git_history` object are deserialized and gathered in a pandas DataFrame.
-
-# In[7]:
-
-import pandas as pd
-import numpy as np
-
-
-# In[8]:
-
-def data_structure(git_history_object):
-    
-    all_filenames = pd.DataFrame(pd.DataFrame(list(git_history_object.all_files)),columns=git_history_object.commits, index=git_history_object.all_files)
-
-    # fill NaN
-    all_filenames.fillna('N', inplace=True)
-
-    actual_commit = 0
-    # previous_commit = 0
-    for i in git_history_object.all_commits:
-        # set the commit number
-        if i[0] == 'C':
-            value = i[1]
-            # starting at the second commit see which file exist in the previous commit
-            if actual_commit != int(all_filenames.columns[0]):
-                 previous_commit = actual_commit
-            actual_commit = value
-            # assig 1 to file not null un the previous commit
-            if previous_commit != 0:
-                all_filenames[actual_commit][
-                    (all_filenames[previous_commit] != 'N') & (all_filenames[previous_commit] != 'D')] = 'S'
-    #             all_filenames[previous_commit][all_filenames[actual_commit] == 'D'] = 'D'
-    #             all_filenames[actual_commit][all_filenames[actual_commit] == 'D']   = 'N'
-    #         print previous_commit,'>',actual_commit
-        else:
-            state,value = i
-    #         print ' '*4,'-',state,value
-            all_filenames.ix[value,actual_commit] = state
-    return all_filenames
-
+# The data gather in `githistoryvis.git_history()` object are deserialized and gathered in a pandas DataFrame by the `githistoryvis.definedatamatrix()` method.
 
 # In[9]:
 
-all_filenames = data_structure(gt)
+gt.definedatamatrix()
+gt.datamatrix
 
 
 # ## Visualize the data
@@ -139,7 +101,7 @@ from matplotlib import pyplot as plt
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[38]:
+# In[11]:
 
 def plot_history_df(plot_df,**kwargs):
 
@@ -159,7 +121,7 @@ def plot_history_df(plot_df,**kwargs):
         linewidths = 3
         
     h = plot_df.applymap(lambda x: gt.def_states[x]).values.copy()
-    h[h == 128] = np.nan
+    h[h == gt.def_states['N']] = float('nan')
 
     fig = plt.figure(figsize=figsize)
 
@@ -193,8 +155,7 @@ def plot_history_df(plot_df,**kwargs):
 
     ax2 = fig.add_axes([0.25, .9, 0.5, 0.075])
 
-    colors = np.array(gt.def_states.values()).astype('float')
-    colors[colors == 128] = np.nan
+    colors = [i if i != gt.def_states['N'] else float('nan') for i in gt.def_states.values()]
 
     x = range(len(colors))
     y = [1 for kk in x]
@@ -218,56 +179,49 @@ def plot_history_df(plot_df,**kwargs):
         tic.label1On = tic.label2On = False
 
     if 'outpath' in kwargs:
-#         print 'Saving figure in '+kwargs['outpath']
-        fig.savefig(kwargs['outpath'])
+        fig.savefig(kwargs['outpath'],bbox_inches='tight', pad_inches=0)
         plt.close()
 
 
-# In[49]:
+# In[12]:
 
-all_filenames
-plot_history_df(all_filenames,size= 375)
-plot_history_df(all_filenames,size= 375,outpath=path+os.sep+'images/complete_visual_history.png')
+gt.datamatrix
+plot_history_df(gt.datamatrix,size= 300, figsize = [10,14])
+plot_history_df(gt.datamatrix,size= 300, figsize = [10,14],outpath=path+os.sep+'images/complete_visual_history.png')
 
 
-# In[48]:
+# In[13]:
 
 # filtering the history on:
 # a commit range
-plot_df_commit_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
-plot_df_commit_range
-plot_history_df(plot_df_commit_range,size= 350)
-plot_history_df(plot_df_commit_range,size= 350,outpath=path+os.sep+'images/commit_range.png')
+plot_df_commit_range = gt.datamatrix.ix[:,'a4cb9a1':'1222c5e']
+plot_history_df(plot_df_commit_range,size= 300, figsize= [3,13])
+plot_history_df(plot_df_commit_range,size= 300, figsize= [3,13], outpath=path+os.sep+'images/commit_range.png')
 
 
-# In[47]:
+# In[14]:
 
 # filtering the history on:
 # a file range: all files not ending with txt
-plot_df_file_range = all_filenames[~all_filenames.index.str.contains('txt$')]
-plot_history_df(plot_df_file_range,size= 300,figsize= [9,7])
-plot_history_df(plot_df_file_range,size= 300,figsize= [9,7],outpath=path+os.sep+'images/file_range.png')
+plot_df_file_range = gt.datamatrix[~gt.datamatrix.index.str.contains('txt$')]
+plot_history_df(plot_df_file_range,size= 300, figsize= [10,11.5])
+plot_history_df(plot_df_file_range,size= 300, figsize= [10,11.5], outpath=path+os.sep+'images/file_range.png')
 
 
-# In[50]:
-
-# filtering the history on:
-# a commit range AND a file range: all files not ending with txt
-plot_df_commit_file_range = all_filenames.ix[:,'a4cb9a1':'1222c5e'][~all_filenames.index.str.contains('txt$')]
-plot_history_df(plot_df_commit_file_range,size= 300,figsize= [9,7])
-plot_history_df(plot_df_commit_file_range,size= 300,figsize= [9,7],outpath=path+os.sep+'images/commit_file_range.png')
-
-
-# In[54]:
+# In[15]:
 
 # filtering the history on:
 # a commit range AND a file range: all files not ending with txt
-plot_df_state_filter = all_filenames[all_filenames[all_filenames.columns[-1]] != 'N']
-plot_history_df(plot_df_state_filter,size= 300,figsize= [9,7])
-plot_history_df(plot_df_state_filter,size= 300,figsize= [9,7],outpath=path+os.sep+'images/state_filter.png')
+plot_df_commit_file_range = gt.datamatrix.ix[:,'a4cb9a1':'1222c5e'][~gt.datamatrix.index.str.contains('txt$')]
+plot_history_df(plot_df_commit_file_range,size= 300,figsize= [3,12])
+plot_history_df(plot_df_commit_file_range,size= 300,figsize= [3,12],outpath=path+os.sep+'images/commit_file_range.png')
 
 
-# In[ ]:
+# In[16]:
 
-
+# filtering the history on:
+# a commit range AND a file range: all files not ending with txt
+plot_df_state_filter = gt.datamatrix[gt.datamatrix[gt.datamatrix.columns[-1]] != 'N']
+plot_history_df(plot_df_state_filter,size= 300,figsize= [10,10])
+plot_history_df(plot_df_state_filter,size= 300,figsize= [10,10],outpath=path+os.sep+'images/state_filter.png')
 
