@@ -22,16 +22,17 @@ This example is on this very repository. The first `*txt` files were only placeh
 This is the complete visual history of this repository using
 
 ```python
-plot_history_df(all_filenames)
+plot_history_df(gt.datamatrix,size= 300, figsize = [10,14])
 ```
 
 ![](images/complete_visual_history.png)
 
 
-This is a commit range, using Python Data Analysis Library ([pandas](http://pandas.pydata.org/) using
+This is a commit range, using   using pandas' [Indexing and Selecting Data](http://pandas.pydata.org/pandas-docs/stable/indexing.html) capabilities:
 
 ```python
-plot_df_commit_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
+plot_df_commit_range = gt.datamatrix.ix[:,'a4cb9a1':'1222c5e']
+plot_history_df(plot_df_commit_range,size= 300, figsize= [3,13])
 ```
 
 ![](images/commit_range.png)
@@ -39,7 +40,8 @@ plot_df_commit_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
 This is a range of files, using
 
 ```python
-plot_df_file_range = all_filenames[~all_filenames.index.str.contains('txt$')]
+plot_df_file_range = gt.datamatrix[~gt.datamatrix.index.str.contains('txt$')]
+plot_history_df(plot_df_file_range,size= 300, figsize= [10,11.5])
 ```
 
 ![](images/file_range.png)
@@ -56,7 +58,8 @@ plot_df_commit_file_range = all_filenames.ix[:,'a4cb9a1':'1222c5e']
 This is filter on the all the state in the last commit, using
 
 ```python
-plot_df_state_filter = all_filenames[all_filenames[all_filenames.columns[-1]] != 'N']
+plot_df_state_filter = gt.datamatrix[gt.datamatrix[gt.datamatrix.columns[-1]] != 'N']
+plot_history_df(plot_df_state_filter,size= 300,figsize= [10,10])
 ```
 
 ![](images/state_filter.png)
