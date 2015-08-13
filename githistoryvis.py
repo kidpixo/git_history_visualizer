@@ -155,3 +155,69 @@ class git_history:
                 all_filenames.ix[commit_label,actual_commit] = state
                 #print ' '*(commit_label_len+4),'|',state,commit_label
         self.datamatrix = all_filenames
+
+    def plot_history_df(self,plt,dataframe,**kwargs):
+
+        if 'size' in kwargs:
+            size = kwargs['size']
+        else:
+            size = 500
+
+        if 'figsize' in kwargs:
+            figsize = kwargs['figsize']
+        else:
+            figsize = [10,12]
+
+        if 'linewidths' in kwargs:
+            linewidths = kwargs['linewidths']
+        else:
+            linewidths = 3
+
+        h = dataframe.applymap(lambda x: self.def_states[x]).values.copy()
+        h[h == self.def_states['N']] = float('nan')
+
+        fig = plt.figure(figsize=figsize)
+
+        ax = plt.subplot(111, frameon=False)
+        for i in range(len(dataframe.index)):
+            x = range(len(dataframe.columns))
+            y = [i for kk in x]
+            ax.scatter(x, y, s = size, c=h[i,:], alpha=1, marker='o',linewidths = linewidths , cmap = plt.cm.spectral,vmin = 0, vmax = 255)
+            ax.plot(x, y, lw = 3, c='k', zorder=0, linewidth = linewidths)
+
+        ax.set_xticks(range(h.shape[1]))
+        ax.set_xticklabels(dataframe.columns,rotation=90)
+
+        ax.set_xlabel('commits sha-1 (time arrow to the right ->)')
+        ax.set_xlim([-.5,len(dataframe.columns)-0.5])
+        ax.set_ylabel('file names')
+        ax.set_ylim([-.5,len(dataframe.index)+0.5])
+        ax.tick_params(axis='both',which='both',length=0, width=0)
+
+        ax.set_yticks(range(h.shape[0]))
+        ax.set_yticklabels(dataframe.index.tolist())
+        ax.set_yticks = 0.1
+
+        if 'legend' in kwargs:
+            xsize, ysize = fig.get_size_inches()
+            w = 0.3
+            l = (1.-w)/2.
+            ax2 = fig.add_axes([(1.-w)/2., -.01, w, 0.035], frameon=False)
+
+            colors = [i if i != self.def_states['N'] else float('nan') for i in self.def_states.values()]
+
+            x = range(len(colors))
+            y = [1 for kk in x]
+            ax2.scatter(x, y, s = size, c=colors, alpha=1, marker='o',linewidths = linewidths, cmap = plt.cm.spectral,vmin = 0, vmax = 255)
+            ax2.plot(x, y, lw = 3, c='k', zorder=0,linewidth = linewidths)
+
+            ax2.set_xticks(x)
+            ax2.set_xticklabels(self.def_states_explain.values())
+            ax2.set_xlabel('Legend')
+            ax2.set_xlim([-.5,len(x)-0.5])
+            ax2.set_ylim([0.99,1.01])
+            ax2.tick_params(axis='both',which='both',length=0, width=0, labelleft='off')
+
+        if 'outpath' in kwargs:
+            fig.savefig(kwargs['outpath'],bbox_inches='tight', pad_inches=0)
+            plt.close()
