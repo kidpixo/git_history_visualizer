@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[7]:
+# In[18]:
 
 import githistoryvis as ghv
 
@@ -54,7 +54,7 @@ import githistoryvis as ghv
 # 
 # 
 
-# In[8]:
+# In[19]:
 
 import os
 
@@ -77,7 +77,7 @@ gt.get_history()
 # 
 # The data gather in `githistoryvis.git_history()` object are deserialized and gathered in a pandas DataFrame by the `githistoryvis.definedatamatrix()` method.
 
-# In[9]:
+# In[20]:
 
 gt.definedatamatrix()
 gt.datamatrix
@@ -94,134 +94,51 @@ gt.datamatrix
 # - linewidths (default 3) : width of the pyplot.scatteplot outer lines.
 # - outpath : if defined, the figure will be saved without visualization.
 
-# In[10]:
+# In[21]:
 
 import matplotlib
 from matplotlib import pyplot as plt
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[11]:
+# In[22]:
 
-def plot_history_df(plot_df,**kwargs):
-
-    if 'size' in kwargs:
-        size = kwargs['size']
-    else:
-        size = 500
-        
-    if 'figsize' in kwargs:
-        figsize = kwargs['figsize']
-    else:
-        figsize = [10,12]
-        
-    if 'linewidths' in kwargs:
-        linewidths = kwargs['linewidths']
-    else:
-        linewidths = 3
-        
-    h = plot_df.applymap(lambda x: gt.def_states[x]).values.copy()
-    h[h == gt.def_states['N']] = float('nan')
-
-    fig = plt.figure(figsize=figsize)
-
-    ax = plt.subplot(111)
-    for i in range(len(plot_df.index)):
-        x = range(len(plot_df.columns))
-        y = [i for kk in x]
-        ax.scatter(x, y, s = size, c=h[i,:], alpha=1, marker='o',linewidths = linewidths , cmap = plt.cm.spectral,vmin = 0, vmax = 255)
-        ax.plot(x, y, lw = 3, c='k', zorder=0)
-
-    ax.set_xticks(range(h.shape[1]))
-    ax.set_xticklabels(plot_df.columns,rotation=90)
-
-    ax.set_xlabel('commits sha-1 (time arrow to the right ->)')
-    ax.set_xlim([-.5,len(plot_df.columns)-0.5])
-    ax.set_ylabel('file names')
-    ax.set_yticks(range(h.shape[0]))
-    ax.set_yticklabels(plot_df.index.tolist())
-    ax.set_yticks = 0.1
-    # set 0 to bounding box width
-    [i.set_linewidth(0.0) for i in ax.spines.itervalues()]
-    # see http://stackoverflow.com/a/20416681/1435167
-    # erase x ticks
-    for tic in ax.xaxis.get_major_ticks():
-        tic.tick1On = tic.tick2On = False
-    #     tic.label1On = tic.label2On = False
-    # erase y ticks
-    for tic in ax.yaxis.get_major_ticks():
-        tic.tick1On = tic.tick2On = False
-    #     tic.label1On = tic.label2On = False
-
-    ax2 = fig.add_axes([0.25, .9, 0.5, 0.075])
-
-    colors = [i if i != gt.def_states['N'] else float('nan') for i in gt.def_states.values()]
-
-    x = range(len(colors))
-    y = [1 for kk in x]
-    ax2.scatter(x, y, s = size, c=colors, alpha=1, marker='o',linewidths = 3, cmap = plt.cm.spectral,vmin = 0, vmax = 255)
-    ax2.plot(x, y, lw = 3, c='k', zorder=0)
-
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(gt.def_states_explain.values())
-    ax2.set_xlabel('Legend')
-    ax2.set_xlim([-.5,len(x)-0.5])
-    ax2.set_ylim([0.99,1.01])
-    # set 0 to bounding box width
-    [i.set_linewidth(0.0) for i in ax2.spines.itervalues()]
-    # # see http://stackoverflow.com/a/20416681/1435167
-    # erase x ticks
-    for tic in ax2.xaxis.get_major_ticks():
-        tic.tick1On = tic.tick2On = False
-    # erase y ticks
-    for tic in ax2.yaxis.get_major_ticks():
-        tic.tick1On = tic.tick2On = False
-        tic.label1On = tic.label2On = False
-
-    if 'outpath' in kwargs:
-        fig.savefig(kwargs['outpath'],bbox_inches='tight', pad_inches=0)
-        plt.close()
+gt.plot_history_df(plt,gt.datamatrix,size= 300, figsize = [12,10.5])
+gt.plot_history_df(plt,gt.datamatrix,size= 300, figsize = [12,10.5],outpath=path+os.sep+'images/complete_visual_history.png')
 
 
-# In[12]:
-
-gt.datamatrix
-plot_history_df(gt.datamatrix,size= 300, figsize = [10,14])
-plot_history_df(gt.datamatrix,size= 300, figsize = [10,14],outpath=path+os.sep+'images/complete_visual_history.png')
-
-
-# In[13]:
+# In[24]:
 
 # filtering the history on:
 # a commit range
 plot_df_commit_range = gt.datamatrix.ix[:,'a4cb9a1':'1222c5e']
-plot_history_df(plot_df_commit_range,size= 300, figsize= [3,13])
-plot_history_df(plot_df_commit_range,size= 300, figsize= [3,13], outpath=path+os.sep+'images/commit_range.png')
+gt.plot_history_df(plt,plot_df_commit_range,size= 300, figsize= [3,10])
+gt.plot_history_df(plt,plot_df_commit_range,size= 300, figsize= [3,10], outpath=path+os.sep+'images/commit_range.png')
 
 
-# In[14]:
+# In[25]:
 
 # filtering the history on:
 # a file range: all files not ending with txt
 plot_df_file_range = gt.datamatrix[~gt.datamatrix.index.str.contains('txt$')]
-plot_history_df(plot_df_file_range,size= 300, figsize= [10,11.5])
-plot_history_df(plot_df_file_range,size= 300, figsize= [10,11.5], outpath=path+os.sep+'images/file_range.png')
+gt.plot_history_df(plt,plot_df_file_range,size= 300, figsize= [11.5,8.5])
+gt.plot_history_df(plt,plot_df_file_range,size= 300, figsize= [11.5,8.5], outpath=path+os.sep+'images/file_range.png')
 
 
-# In[15]:
+# In[26]:
 
 # filtering the history on:
 # a commit range AND a file range: all files not ending with txt
 plot_df_commit_file_range = gt.datamatrix.ix[:,'a4cb9a1':'1222c5e'][~gt.datamatrix.index.str.contains('txt$')]
-plot_history_df(plot_df_commit_file_range,size= 300,figsize= [3,12])
-plot_history_df(plot_df_commit_file_range,size= 300,figsize= [3,12],outpath=path+os.sep+'images/commit_file_range.png')
+gt.plot_history_df(plt,plot_df_commit_file_range,size= 300,figsize= [3.5,8.5])
+gt.plot_history_df(plt,plot_df_commit_file_range,size= 300,figsize= [3.5,8.5],outpath=path+os.sep+'images/commit_file_range.png')
 
 
-# In[16]:
+# In[27]:
 
 # filtering the history on:
 # a commit range AND a file range: all files not ending with txt
 plot_df_state_filter = gt.datamatrix[gt.datamatrix[gt.datamatrix.columns[-1]] != 'N']
-plot_history_df(plot_df_state_filter,size= 300,figsize= [10,10])
-plot_history_df(plot_df_state_filter,size= 300,figsize= [10,10],outpath=path+os.sep+'images/state_filter.png')
+gt.plot_history_df(plt,plot_df_state_filter,size= 300,figsize= [11,6])
+gt.plot_history_df(plt,plot_df_state_filter,size= 300,figsize= [11,6],outpath=path+os.sep+'images/state_filter.png')
 
