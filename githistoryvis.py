@@ -157,7 +157,19 @@ class git_history:
         self.datamatrix = all_filenames
 
     def plot_history_df(self,plt,dataframe,**kwargs):
+    """"
+    Visualize the data
 
+    The data from the pandas DataFrame in self.datamatrix could be visualized by this simple example routine.
+    The arguments are:
+
+    - plt : the imported name of matplotlib.pyplot.
+    - size (default 200) : the size of the pyplot.scatteplot.
+    - figsize (default [9,7]) : size of the pyplot.figure.
+    - linewidths (default 3) : width of the pyplot.scatteplot outer lines.
+    - outpath : if defined, the figure will be saved without visualization.
+    - legend : if defined to any value, will show a bad legend.
+    """"
         if 'size' in kwargs:
             size = kwargs['size']
         else:
