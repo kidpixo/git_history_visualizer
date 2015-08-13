@@ -11,9 +11,16 @@ The idea is to extract the whole commits log via the `git` command (you should h
 - the list off the file ever existed in this branch
 - the list of allsthe commit (at this stage we use the short SHA-1)
 
+# Requirements
+
+- Pandas (for data handling)
+- Matplotlib (for image generation)
+
 # Example
 
-The notebook and the python script included ([git_history_test_git.ipynb](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.ipynb) and [git_history_test_git.py](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.py)) are just example. 
+The simplest way to get your image is to open [example_githistoryvis.py](https://github.com/kidpixo/git_history_visualizer/blob/master/example_githistoryvis.py), change the repository pathm the output path , save and run `python example_githistoryvis.py`. 
+
+To have a better look of what is happening, the notebook and the python script included ([git_history_test_git.ipynb](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.ipynb) and [git_history_test_git.py](https://github.com/kidpixo/git_history_visualizer/blob/master/git_history_test_git.py)) are extended examples.
 
 Change the path at the beginning with your repository path and play with the visualizzation at the end.
 
