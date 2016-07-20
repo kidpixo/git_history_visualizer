@@ -1,4 +1,10 @@
-# [ipython/.gitignore](https://github.com/ipython/ipython/blob/master/.gitignore)
+
+# Created by https://www.gitignore.io/api/ipythonnotebook
+
+### IPythonNotebook ###
+# Temporary data
+.ipynb_checkpoints/
+
 MANIFEST
 build
 dist
