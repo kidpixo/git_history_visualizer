@@ -53,11 +53,11 @@ class git_history:
 
         Methods:
 
-        The method
+        get_history
 
-        foo.get_history([prettyformat='%h'],[gitcommitlist=False])
+            foo.get_history(prettyformat='%h',gitcommitlist=False])
 
-        extract the git log, and define:
+        extracts the git log, and define:
 
         - foo.all_commits = the whole git log
         - foo.commits     = the commits SHA-1
@@ -87,7 +87,20 @@ class git_history:
 
         and pass the result to get_history method:
 
-        gt.get_history(gitcommitlist=data)
+        foo.get_history(gitcommitlist=data)
+
+
+        to_dict()
+
+            foo.to_dict()
+
+        converts a a full list of commits to a OrderedDict like:
+
+        {
+        'hash' : {
+                 'file_name': 'status'
+                 }
+        }
 
 
         Status
@@ -188,6 +201,23 @@ class git_history:
         self.all_commits = [i.group(0).split('\t') for i in re.finditer(r'[^\r\n]+', p) if '\t' in i.group(0)]
 
         self.decodelog()
+
+    def to_dict(self):
+        import collections
+        iterlist = iter(self.all_commits)
+        all_commit_dict = collections.OrderedDict()
+        tmp = {}
+        for s,k in iterlist:
+            if s != 'COMMIT':
+                tmp[k] = s
+            else:
+                if len(tmp) != 0 :
+                    all_commit_dict[commit_hash] = tmp
+                    tmp = {}
+                commit_hash = k
+        all_commit_dict[commit_hash] = tmp
+
+        return all_commit_dict
 
     def decodelog(self):
         # get all the commits SHA-1

@@ -19,11 +19,11 @@ gt.get_history(gitcommitlist=data)
 
 # Here is Pandas needed
 # define the datamatrix : define gt.datamatrix,
-# a Pandas.DataFrame with categorical columns
+# a Pandas.Dataurame with categorical columns
 gt.definedatamatrix()
 
 # new compact version
-gt = ghv.git_history(path, get_history=False, definedatamatrix=False)
+gt = ghv.git_history(path, get_history=True, definedatamatrix=True)
 
 # visualization
 import matplotlib
