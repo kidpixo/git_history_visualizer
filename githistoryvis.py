@@ -1,5 +1,4 @@
 # This Python file uses the following encoding: utf-8
-import subprocess
 
 
 class git_history:
@@ -7,7 +6,11 @@ class git_history:
 
         Inizialization:
 
-        foo = git_history(PATH)
+        foo = git_history(PATH, get_history=False, definedatamatrix=False)
+
+        Optionally, set get_history and  definedatamatrix to True
+        to have all the process done in place, instead of calling
+        each method.
 
         At the inizialitation the attribute self.path
         that point to the git respository in PATH.
@@ -17,20 +20,34 @@ class git_history:
         in the dataframe to number for visualization and define
         the legend. You can overwrite them at your own risk.
 
+        # this is used as colorcode in the datamatrix
         def_states = {
-            'A' : 120.,
-            'M' : 180.,
-            'S' : 255., # custom value, Static
-            'D' : 240.,
-            'N' : 128., # custom value, Non existent
+            u'A': 120,
+            u'C': 25,
+            u'B': 51,
+            u'D': 240,
+            u'M': 180,
+            u'R': 102,
+            u'U': 204,
+            u'T':  76,
+            u'X': 153,
+            u'S': 255,   # custom value, Static
+            u'N': None,  # custom value, Non existent
         }
 
+        # this is only a humand readable format
         def_states_explain = {
-            'A' : 'Added',
-            'D' : 'Deleted',
-            'M' : 'Modified',
-            'S' : 'Static',
-            'N' : 'Non existent'
+            u'A': u'added',
+            u'C': u'copied',
+            u'D': u'deleted',
+            u'M': u'modified',
+            u'R': u'renamed',
+            u'T': u'type changed',
+            u'U': u'unmerged',
+            u'X': u'unknown',
+            u'B': u'pairing broken',
+            u'S': u'Static',
+            u'N': u'Non existent'
         }
 
 
@@ -38,7 +55,7 @@ class git_history:
 
         The method
 
-        foo.get_history([prettyformat='%h'])
+        foo.get_history([prettyformat='%h'],[gitcommitlist=False])
 
         extract the git log, and define:
 
@@ -46,12 +63,32 @@ class git_history:
         - foo.commits     = the commits SHA-1
         - foo.all_files   = all the unique file ever existed
 
-        Prettyformat
-        This is optional, you can define one of the git
-        prettyformat from http://git-scm.com/docs/pretty-formats.
-        I can for example get the whole commit text and write your
-        own parser for sel.decodelog().
+        Arguments
+
+        prettyformat, default %h
+
+        optional, accept one of the git prettyformat, see
+        http://git-scm.com/docs/pretty-formats.
+        For example, get the whole commit text with '%s' and write
+        your own parser for sel.decodelog().
         Deafault is '%h' of the short SHA-1 of the commit.
+
+        gitcommitlist, default False
+
+        optional, if present should be a string withthe result of:
+
+        git -C PATH --no-pager log --reverse --name-status --oneline --pretty="format:COMMIT%x09%h"
+
+        For example, execute this command in remote and store the result in a file,
+        read the content
+
+        with open('gitoutput', 'r') as file:
+            data = file.read()
+
+        and pass the result to get_history method:
+
+        gt.get_history(gitcommitlist=data)
+
 
         Status
 
@@ -61,6 +98,13 @@ class git_history:
         - A : file **A**dded
         - D : file **D**eleted
         - M : file **M**odified
+        - C : **C**opied
+        - R : **R**enamed
+        - T : **T**ype changed
+        - U : **U**nmerged
+        - X : unknown
+        - B : pairing **B**roken
+
 
         Custom defined status:
 
@@ -85,34 +129,63 @@ class git_history:
 
     """
     def_states = {
-        'A': 120.,
-        'M': 180.,
-        'S': 255.,  # custom value, Static
-        'D': 240.,
-        'N': 128.,  # custom value, Non existent
+        u'A': 120,
+        u'C': 25,
+        u'B': 51,
+        u'D': 240,
+        u'M': 180,
+        u'R': 102,
+        u'U': 204,
+        u'T':  76,
+        u'X': 153,
+        u'S': 255,   # custom value, Static
+        u'N': None,  # custom value, Non existent
     }
 
     def_states_explain = {
-        'A': 'Added',
-        'D': 'Deleted',
-        'M': 'Modified',
-        'S': 'Static',
-        'N': 'Non existent'
+        u'A': u'added',
+        u'C': u'copied',
+        u'D': u'deleted',
+        u'M': u'modified',
+        u'R': u'renamed',
+        u'T': u'type changed',
+        u'U': u'unmerged',
+        u'X': u'unknown',
+        u'B': u'pairing broken',
+        u'S': u'Static',
+        u'N': u'Non existent'
     }
 
-    def __init__(self, repo_path):
+    def __init__(self, repo_path, get_history=False, definedatamatrix=False):
         self.path = repo_path
+        if get_history:
+            self.get_history()
+        if definedatamatrix:
+            self.definedatamatrix()
 
-    def get_history(self, **kwargs):
+    def get_history(self, gitcommitlist=False, **kwargs):
+        import re
+        import subprocess
+
         if 'prettyformat' in kwargs:
             prettyformat = kwargs['prettyformat']
         else:
             prettyformat = "%h"
 
-        # get the whole git history
-        p = subprocess.check_output(["git -C "+self.path+""" --no-pager log --reverse --name-status --oneline --pretty='format:COMMIT\t'"""+prettyformat], shell=True, universal_newlines=True)
-        # now it is truly pythonic not dependant from machine beneath, as long as git command is available
-        self.all_commits = [i.split('\t') for i in p.split('\n') if '\t' in i]
+        if not gitcommitlist:
+            # get the whole git history
+            p = subprocess.check_output(['git -C "{}" --no-pager log --reverse --name-status --oneline --pretty="format:COMMIT\t{}"'.format(self.path, prettyformat)], shell=True, universal_newlines=True)
+        else:
+            p = gitcommitlist
+
+        # import ipdb
+        # ipdb.set_trace()
+
+        # old list version
+        # self.all_commits = [i.split('\t') for i in p.split('\n') if '\t' in i]
+
+        # new iterator version
+        self.all_commits = [i.group(0).split('\t') for i in re.finditer(r'[^\r\n]+', p) if '\t' in i.group(0)]
 
         self.decodelog()
 
@@ -126,7 +199,7 @@ class git_history:
     def definedatamatrix(self):
         import pandas as pd
 
-        all_filenames = pd.DataFrame(pd.DataFrame(list(self.all_files)), columns=self.commits, index=self.all_files)
+        all_filenames = pd.DataFrame(columns=self.commits, index=self.all_files)
 
         # fill NaN
         all_filenames.fillna('N', inplace=True)
@@ -153,7 +226,7 @@ class git_history:
             else:
                 all_filenames.ix[commit_label, actual_commit] = state
                 # print ' '*(commit_label_len+4), '|', state, commit_label
-        self.datamatrix = all_filenames
+        self.datamatrix = all_filenames.apply(lambda x: x.astype('category'))
 
     def plot_history_df(self, plt, dataframe, **kwargs):
         """
@@ -185,7 +258,6 @@ class git_history:
             linewidths = 3
 
         h = dataframe.applymap(lambda x: self.def_states[x]).values.copy()
-        h[h == self.def_states['N']] = float('nan')
 
         fig = plt.figure(figsize=figsize)
 
