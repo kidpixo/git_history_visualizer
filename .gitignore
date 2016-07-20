@@ -1,9 +1,19 @@
-
 # Created by https://www.gitignore.io/api/ipythonnotebook
 
+### Vim ###
+# swap
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+# session
+Session.vim
+# temporary
+.netrwhist
+*~
+# auto-generated tag files
+tags
 ### IPythonNotebook ###
 # Temporary data
-.ipynb_checkpoints/
+.ipynb_checkpoints
 
 MANIFEST
 build
